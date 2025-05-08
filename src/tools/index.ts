@@ -1,13 +1,14 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import {
   callContractHandler,
-  erc20BalanceHandler,
-  erc20TransferHandler,
-  getGasPriceHandler,
-  getAddressHandler,
+  deployIpfsNftHandler,
   deployPropertyNFTHandler,
   deployPropertyTokenHandler,
   deployPropertyYieldVaultHandler,
+  erc20BalanceHandler,
+  erc20TransferHandler,
+  getAddressHandler,
+  getGasPriceHandler,
 } from "./handlers.js";
 
 const callContractTool: Tool = {
@@ -169,6 +170,33 @@ const deployPropertyYieldVaultTool: Tool = {
   },
 };
 
+const deployIpfsNftTool: Tool = {
+  name: "deploy_ipfs_nft",
+  description: "Deploy an NFT to IPFS",
+  inputSchema: {
+    type: "object",
+    properties: {
+      contractAddress: {
+        type: "string",
+        description: "The address of the underlying ERC721 Token",
+      },
+      name: {
+        type: "string",
+        description: "The name of the NFT token",
+      },
+      description: {
+        type: "string",
+        description: "The description of the NFT token",
+      },
+      image: {
+        type: "string",
+        description: "The URL of the NFT token's image",
+      },
+    },
+    required: ["contractAddress", "name", "description"],
+  },
+};
+
 export const rskMcpTools: Tool[] = [
   callContractTool,
   erc20BalanceTool,
@@ -178,6 +206,7 @@ export const rskMcpTools: Tool[] = [
   deployPropertyNFTTool,
   deployPropertyTokenTool,
   deployPropertyYieldVaultTool,
+  deployIpfsNftTool,
 ];
 
 // biome-ignore lint/complexity/noBannedTypes: temp
@@ -190,4 +219,5 @@ export const toolToHandler: Record<string, Function> = {
   deploy_property_nft: deployPropertyNFTHandler,
   deploy_property_token: deployPropertyTokenHandler,
   deploy_property_yield_vault: deployPropertyYieldVaultHandler,
+  deploy_ipfs_nft: deployIpfsNftHandler,
 };

@@ -1,29 +1,29 @@
+import { create as createIpfsClient } from "ipfs-http-client";
 import {
-  encodeFunctionData,
   erc20Abi,
   formatUnits,
   isAddress,
   parseUnits,
   type Abi,
   type AbiFunction,
-  type Account,
   type PublicActions,
   type WalletClient,
 } from "viem";
+import { rootstockTestnet } from "viem/chains";
 import type { z } from "zod";
+import { PropertyNFT } from "../contracts/PropertyNFT.js";
+import { PropertyToken } from "../contracts/PropertyToken.js";
+import { PropertyYieldVault } from "../contracts/PropertyYieldVault.js";
+import { constructRskScanUrl } from "../utils/index.js";
 import type {
   CallContractSchema,
+  DeployIpfsNftSchema,
   DeployPropertyNFTSchema,
   DeployPropertyTokenSchema,
   DeployPropertyYieldVaultSchema,
   Erc20BalanceSchema,
   Erc20TransferSchema,
 } from "./schemas.js";
-import { constructRskScanUrl } from "../utils/index.js";
-import { rootstock } from "viem/chains";
-import { PropertyNFT } from "../contracts/PropertyNFT.js";
-import { PropertyToken } from "../contracts/PropertyToken.js";
-import { PropertyYieldVault } from "../contracts/PropertyYieldVault.js";
 
 export async function deployPropertyNFTHandler(
   wallet: WalletClient & PublicActions,
@@ -42,7 +42,7 @@ export async function deployPropertyNFTHandler(
   // Return transaction hash and RootstockScan URL
   return JSON.stringify({
     hash,
-    url: constructRskScanUrl(wallet.chain ?? rootstock, hash),
+    url: constructRskScanUrl(wallet.chain ?? rootstockTestnet, hash),
   });
 }
 
@@ -75,7 +75,7 @@ export async function deployPropertyTokenHandler(
   // Return transaction hash and RootstockScan URL
   return JSON.stringify({
     hash,
-    url: constructRskScanUrl(wallet.chain ?? rootstock, hash),
+    url: constructRskScanUrl(wallet.chain ?? rootstockTestnet, hash),
   });
 }
 
@@ -112,7 +112,7 @@ export async function deployPropertyYieldVaultHandler(
   // Return transaction hash and RootstockScan URL
   return JSON.stringify({
     hash,
-    url: constructRskScanUrl(wallet.chain ?? rootstock, hash),
+    url: constructRskScanUrl(wallet.chain ?? rootstockTestnet, hash),
   });
 }
 
@@ -166,7 +166,7 @@ export async function callContractHandler(
   const tx = await wallet.simulateContract({
     account: wallet.account,
     abi,
-    address: args.contractAddress,
+    address: args.contractAddress as `0x${string}`,
     functionName: args.functionName,
     value: BigInt(args.value ?? 0),
     args: args.functionArgs,
@@ -176,7 +176,7 @@ export async function callContractHandler(
 
   return JSON.stringify({
     hash: txHash,
-    url: constructRskScanUrl(wallet.chain ?? rootstock, txHash),
+    url: constructRskScanUrl(wallet.chain ?? rootstockTestnet, txHash),
   });
 }
 
@@ -231,10 +231,10 @@ export async function erc20TransferHandler(
   const atomicUnits = parseUnits(amount, decimals);
 
   const tx = await wallet.simulateContract({
-    address: contractAddress,
+    address: contractAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: "transfer",
-    args: [toAddress, atomicUnits],
+    args: [toAddress as `0x${string}`, atomicUnits],
     account: wallet.account,
     chain: wallet.chain,
   });
@@ -243,7 +243,7 @@ export async function erc20TransferHandler(
 
   return JSON.stringify({
     hash: txHash,
-    url: constructRskScanUrl(wallet.chain ?? rootstock, txHash),
+    url: constructRskScanUrl(wallet.chain ?? rootstockTestnet, txHash),
   });
 }
 
@@ -252,4 +252,60 @@ export async function getGasPriceHandler(
 ): Promise<string> {
   const gasPrice = await wallet.getGasPrice();
   return formatUnits(gasPrice, 9) + " Gwei";
+}
+
+export async function deployIpfsNftHandler(
+  wallet: WalletClient & PublicActions,
+  args: z.infer<typeof DeployIpfsNftSchema>
+): Promise<string> {
+  const { contractAddress, name, description, image } = args;
+
+  const ipfs = createIpfsClient({
+    host: "ipfs.infura.io",
+    port: 5001,
+    protocol: "https",
+  });
+
+  const metadata = {
+    name,
+    description,
+    image,
+  };
+
+  const { path: ipfsHash } = await ipfs.add(JSON.stringify(metadata));
+  const tokenURI = `ipfs://${ipfsHash}`;
+
+  const ERC721_ABI = [
+    {
+      inputs: [
+        { internalType: "address", name: "to", type: "address" },
+        { internalType: "string", name: "tokenURI", type: "string" },
+      ],
+      name: "safeMint",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+  ];
+
+  if (!wallet.account?.address) {
+    throw new Error("No account address available");
+  }
+
+  const tx = await wallet.simulateContract({
+    address: contractAddress as `0x${string}`,
+    abi: ERC721_ABI,
+    functionName: "safeMint",
+    args: [wallet.account.address, tokenURI],
+    account: wallet.account,
+    chain: wallet.chain,
+  });
+
+  const txHash = await wallet.writeContract(tx.request);
+
+  return JSON.stringify({
+    hash: txHash,
+    tokenURI,
+    ipfsUrl: `https://ipfs.io/ipfs/${ipfsHash}`,
+  });
 }

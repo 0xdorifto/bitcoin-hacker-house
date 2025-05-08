@@ -65,3 +65,12 @@ export const DeployPropertyYieldVaultSchema = z.object({
     .string()
     .describe("The ID of the specific property NFT this vault is linked to"),
 });
+
+export const DeployIpfsNftSchema = z.object({
+  contractAddress: z
+    .string()
+    .describe("The address of the underlying ERC721 Token"),
+  name: z.string().describe("The name of the NFT Token"),
+  description: z.string().describe("The description of the NFT token"),
+  image: z.string().describe("The URL of the NFT token's image"),
+});

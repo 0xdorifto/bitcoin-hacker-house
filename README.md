@@ -1,3 +1,7 @@
+([This](#deploy_ipfs_nft) is what was added in the hackathon)
+
+---
+
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rsksmart/rsk-mcp-server/badge)](https://scorecard.dev/viewer/?uri=github.com/rsksmart/rsk-mcp-server)
 [![CodeQL](https://github.com/rsksmart/rsk-mcp-server/workflows/CodeQL/badge.svg)](https://github.com/rsksmart/rsk-mcp-server/actions?query=workflow%3ACodeQL)
 <img src="img/rootstock-docs.png" alt="Rootstock Logo" style="width:100%; height: auto;" />
@@ -16,17 +20,20 @@ This is a Model Context Protocol (MCP) server that provides onchain tools for Cl
 ## Installation
 
 1. Clone this repository:
+
 ```bash
 git clone https://github.com/rsksmart/rsk-mcp-server
 cd rootstock-mcp
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Build the project:
+
 ```bash
 npm run build
 ```
@@ -72,6 +79,7 @@ npm start
 Call a contract function on Rootstock Network.
 
 Parameters:
+
 - `contractAddress`: The address of the contract to call
 - `functionName`: The name of the function to call
 - `functionArgs`: The arguments to pass to the function
@@ -83,6 +91,7 @@ Parameters:
 Get the balance of an ERC20 token on Rootstock Network.
 
 Parameters:
+
 - `contractAddress`: The address of the contract to get the balance of
 
 ### erc20_transfer
@@ -90,6 +99,7 @@ Parameters:
 Transfer an ERC20 token on Rootstock Network.
 
 Parameters:
+
 - `contractAddress`: The address of the contract to transfer the token from
 - `toAddress`: The address of the recipient
 - `amount`: The amount of tokens to transfer
@@ -98,12 +108,25 @@ Parameters:
 
 Get the current gas price on Rootstock Network.
 
+### deploy_ipfs_nft
+
+Mint a new NFT to an existing erc721 contract and deploy the metadata to IPFS.
+
+Parameters:
+
+- `contractAddress`: The address of the underlying ERC721 Token
+- `name`: The name of the NFT Token
+- `description`: The description of the NFT token
+- `image`: The URL of the NFT token's image
+
 ## License
 
 MIT
 
 # Disclaimer
+
 The software provided in this GitHub repository is offered “as is,” without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement.
+
 - **Testing:** The software has not undergone testing of any kind, and its functionality, accuracy, reliability, and suitability for any purpose are not guaranteed.
 - **Use at Your Own Risk:** The user assumes all risks associated with the use of this software. The author(s) of this software shall not be held liable for any damages, including but not limited to direct, indirect, incidental, special, consequential, or punitive damages arising out of the use of or inability to use this software, even if advised of the possibility of such damages.
 - **No Liability:** The author(s) of this software are not liable for any loss or damage, including without limitation, any loss of profits, business interruption, loss of information or data, or other pecuniary loss arising out of the use of or inability to use this software.

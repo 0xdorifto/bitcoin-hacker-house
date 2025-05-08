@@ -4,13 +4,13 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { version } from "./version.js";
 import * as dotenv from "dotenv";
-import { mnemonicToAccount } from "viem/accounts";
-import { rootstock, rootstockTestnet } from "viem/chains";
 import { createWalletClient, http, publicActions } from "viem";
-import { rskMcpTools, toolToHandler } from "./tools/index.js";
+import { mnemonicToAccount } from "viem/accounts";
+import { rootstockTestnet } from "viem/chains";
 import { RSK_RPC_URL } from "./lib/constants.js";
+import { rskMcpTools, toolToHandler } from "./tools/index.js";
+import { version } from "./version.js";
 
 async function main() {
   dotenv.config();
@@ -25,7 +25,7 @@ async function main() {
 
   const viemClient = createWalletClient({
     account: mnemonicToAccount(seedPhrase),
-    chain: rootstock,
+    chain: rootstockTestnet,
     transport: http(RSK_RPC_URL),
   }).extend(publicActions);
 
@@ -38,7 +38,7 @@ async function main() {
       capabilities: {
         tools: {},
       },
-    },
+    }
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => {
